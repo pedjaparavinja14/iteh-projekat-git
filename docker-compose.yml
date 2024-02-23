@@ -1,0 +1,45 @@
+version: '3.1'
+services:
+  nginx:
+    image: nginx
+    restart: always
+    networks:
+      - my_network
+    ports:
+      - 80:80
+      - 81:81
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf
+  api:
+    build: ./backend/
+    container_name: backend
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: simpledb
+    depends_on:
+      - front
+    networks:
+      - my_network
+  front:
+    build: ./frontend/
+    container_name: frontend
+    networks:
+      - my_network
+  db:
+    image: mysql
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: simpledb
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - my_network
+volumes:
+  mysql_data:
+    driver: local
+networks:
+  my_network:
+    driver: bridge
